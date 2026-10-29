@@ -118,11 +118,19 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
             {team.pokemons.map((pokemon) => (
               <div className="col-12 col-sm-6 col-md-4 col-lg-3" key={pokemon.id}>
                 <article className="card pokemon-card h-100 shadow-sm text-center">
-                  <div className="p-3 bg-light rounded-top">
+                  <Link
+                    className="p-3 bg-light rounded-top d-block"
+                    to={`/pokemons/${pokemon.id}`}
+                    aria-label={`Bekijk details van ${pokemon.name}`}
+                  >
                     <img className="img-fluid" src={pokemon.image} alt={pokemon.name} loading="lazy" />
-                  </div>
+                  </Link>
                   <div className="card-body d-flex flex-column justify-content-between">
-                    <h3 className="h5 fw-bold text-capitalize">{pokemon.name}</h3>
+                    <h3 className="h5 fw-bold text-capitalize">
+                      <Link className="text-reset text-decoration-none" to={`/pokemons/${pokemon.id}`}>
+                        {pokemon.name}
+                      </Link>
+                    </h3>
                     <button
                       type="button"
                       className="btn btn-outline-danger btn-sm"
