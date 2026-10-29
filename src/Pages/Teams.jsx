@@ -160,9 +160,11 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
           )}
           {!loadingPokemons && !pokemonError && filteredPokemons.length > 0 && (
             <>
-              <p className="text-muted">Kies Pokémon uit de afbeeldingen. Maximaal 18 per keer.</p>
+              <p className="text-muted">
+                Kies Pokémon uit de afbeeldingen. {Math.min(visiblePokemonCount, filteredPokemons.length)} van {filteredPokemons.length} getoond.
+              </p>
               <div className="row g-3">
-                {filteredPokemons.map((pokemon) => {
+                {filteredPokemons.slice(0, visiblePokemonCount).map((pokemon) => {
                   const alreadyInTeam = team.pokemons.some((member) => member.id === pokemon.id)
                   const teamIsFull = team.pokemons.length >= 6
                   return (
@@ -190,6 +192,15 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
                   )
                 })}
               </div>
+              {visiblePokemonCount < filteredPokemons.length && (
+                <button
+                  type="button"
+                  className="btn btn-outline-primary mt-3"
+                  onClick={() => setVisiblePokemonCount((count) => count + 18)}
+                >
+                  Toon meer Pokémon
+                </button>
+              )}
             </>
           )}
         </section>
