@@ -6,11 +6,15 @@ function Pokemons({ favorites, onToggleFavorite }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
+  const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
     const controller = new AbortController()
 
     async function fetchPokemons() {
+      setLoading(true)
+      setError('')
+
       try {
         const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=100000', {
           signal: controller.signal,
@@ -45,7 +49,7 @@ function Pokemons({ favorites, onToggleFavorite }) {
 
     fetchPokemons()
     return () => controller.abort()
-  }, [])
+  }, [retryCount])
 
   const filteredPokemons = pokemons.filter((p) =>
     p.name.toLowerCase().includes(search.trim().toLowerCase())
@@ -105,6 +109,15 @@ function Pokemons({ favorites, onToggleFavorite }) {
       {error && (
         <div className="alert alert-danger text-center" role="alert">
           {error}
+          <div>
+            <button
+              type="button"
+              className="btn btn-outline-danger btn-sm mt-2"
+              onClick={() => setRetryCount((count) => count + 1)}
+            >
+              Opnieuw proberen
+            </button>
+          </div>
         </div>
       )}
 
