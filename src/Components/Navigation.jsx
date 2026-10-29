@@ -7,7 +7,7 @@ function Navigation() {
         <NavLink to="/">Home</NavLink>
       </li>
       <li className="nav-item">
-        <NavLink to="/pokemons">Pokemons</NavLink>
+        <NavLink to="/pokemons">Pokémon</NavLink>
       </li>
       <li className="nav-item">
         <NavLink to="/teams">Teams</NavLink>
