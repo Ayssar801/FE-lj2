@@ -59,7 +59,7 @@ function PokemonDetails({ teams, onAddPokemon }) {
 
   if (loading) {
     return (
-      <div className="container py-5 text-center" role="status">
+      <div className="container py-5 text-center" role="status" aria-busy={loading}>
         <span className="spinner-border text-primary" aria-hidden="true" />
         <p className="mt-3 text-muted">Pokémon-details ophalen...</p>
       </div>

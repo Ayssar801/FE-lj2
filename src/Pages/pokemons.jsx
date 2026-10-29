@@ -75,7 +75,7 @@ function Pokemons({ favorites, onToggleFavorite }) {
   }
 
   return (
-    <div className="container py-4 pokemon-list-page">
+    <div className="container py-4 pokemon-list-page" aria-busy={loading}>
       <div className="text-center mb-4">
         <h1 className="fw-bold text-dark">Pokémon Overzicht</h1>
         <p className="text-muted">Overzicht van Pokémon opgehaald via de PokéAPI.</p>
