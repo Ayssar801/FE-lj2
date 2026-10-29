@@ -11,7 +11,27 @@ function loadTeams() {
   try {
     const storedTeams = localStorage.getItem('pokemon-teams')
     const parsedTeams = storedTeams ? JSON.parse(storedTeams) : []
-    return Array.isArray(parsedTeams) ? parsedTeams : []
+    return Array.isArray(parsedTeams)
+      ? parsedTeams
+        .filter(
+          (team) =>
+            team &&
+            (typeof team.id === 'string' || typeof team.id === 'number') &&
+            typeof team.name === 'string' &&
+            Array.isArray(team.pokemons),
+        )
+        .map((team) => ({
+          ...team,
+          pokemons: team.pokemons
+            .filter(
+              (pokemon) =>
+                Number.isInteger(pokemon?.id) &&
+                typeof pokemon.name === 'string' &&
+                typeof pokemon.image === 'string',
+            )
+            .slice(0, 6),
+        }))
+      : []
   } catch (error) {
     console.error('Teams ophalen uit lokale opslag mislukt:', error)
     return []
