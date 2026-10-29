@@ -15,6 +15,8 @@ function PokemonDetails({ teams, onAddPokemon }) {
     async function fetchPokemon() {
       setLoading(true)
       setError('')
+      setSelectedTeamId('')
+      setTeamMessage('')
 
       try {
         const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`, {
