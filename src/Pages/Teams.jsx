@@ -11,11 +11,15 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
   const [loadingPokemons, setLoadingPokemons] = useState(true)
   const [pokemonError, setPokemonError] = useState('')
   const [error, setError] = useState('')
+  const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
     const controller = new AbortController()
 
     async function fetchPokemons() {
+      setLoadingPokemons(true)
+      setPokemonError('')
+
       try {
         const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=100000', {
           signal: controller.signal,
@@ -45,7 +49,7 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
 
     fetchPokemons()
     return () => controller.abort()
-  }, [])
+  }, [retryCount])
 
   const filteredPokemons = useMemo(() => {
     const query = pokemonSearch.trim().toLowerCase()
@@ -154,7 +158,18 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
             <p className="text-muted">Dit team is vol. Verwijder eerst een Pokémon om er een toe te voegen.</p>
           )}
           {loadingPokemons && <p role="status">Pokémon ophalen uit de PokéAPI...</p>}
-          {pokemonError && <div className="alert alert-danger" role="alert">{pokemonError}</div>}
+          {pokemonError && (
+            <div className="alert alert-danger" role="alert">
+              {pokemonError}
+              <button
+                type="button"
+                className="btn btn-outline-danger btn-sm ms-2"
+                onClick={() => setRetryCount((count) => count + 1)}
+              >
+                Opnieuw proberen
+              </button>
+            </div>
+          )}
           {!loadingPokemons && !pokemonError && pokemonSearch.trim() && filteredPokemons.length === 0 && (
             <p className="text-muted">Geen Pokémon gevonden.</p>
           )}
@@ -264,7 +279,18 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
           </div>
         )}
         {loadingPokemons && <p role="status">Pokémon ophalen uit de PokéAPI...</p>}
-        {pokemonError && <div className="alert alert-danger" role="alert">{pokemonError}</div>}
+        {pokemonError && (
+          <div className="alert alert-danger" role="alert">
+            {pokemonError}
+            <button
+              type="button"
+              className="btn btn-outline-danger btn-sm ms-2"
+              onClick={() => setRetryCount((count) => count + 1)}
+            >
+              Opnieuw proberen
+            </button>
+          </div>
+        )}
         {!loadingPokemons && !pokemonError && filteredPokemons.length === 0 && (
           <p className="text-muted">Geen Pokémon gevonden.</p>
         )}
