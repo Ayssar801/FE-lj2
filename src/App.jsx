@@ -62,9 +62,9 @@ function App() {
   const [storageError, setStorageError] = useState('')
 
   function saveTeams(nextTeams) {
-    setTeams(nextTeams)
     try {
       localStorage.setItem('pokemon-teams', JSON.stringify(nextTeams))
+      setTeams(nextTeams)
       setStorageError('')
     } catch (error) {
       console.error('Teams opslaan mislukt:', error)
@@ -108,9 +108,9 @@ function App() {
       ? favorites.filter((favorite) => favorite.id !== pokemon.id)
       : [...favorites, pokemon]
 
-    setFavorites(nextFavorites)
     try {
       localStorage.setItem('pokemon-favorites', JSON.stringify(nextFavorites))
+      setFavorites(nextFavorites)
       setStorageError('')
     } catch (error) {
       console.error('Favorieten opslaan mislukt:', error)
