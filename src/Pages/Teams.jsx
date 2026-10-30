@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
+const MAX_TEAM_SIZE = 6
+const POKEMON_BATCH_SIZE = 18
+
 function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam }) {
   const { teamId } = useParams()
   const [pokemons, setPokemons] = useState([])
   const [newTeamName, setNewTeamName] = useState('')
   const [pokemonSearch, setPokemonSearch] = useState('')
-  const [visiblePokemonCount, setVisiblePokemonCount] = useState(18)
+  const [visiblePokemonCount, setVisiblePokemonCount] = useState(POKEMON_BATCH_SIZE)
   const [selectedPokemons, setSelectedPokemons] = useState([])
   const [loadingPokemons, setLoadingPokemons] = useState(true)
   const [pokemonError, setPokemonError] = useState('')
@@ -56,6 +59,7 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
     if (!query) return pokemons
     return pokemons.filter((pokemon) => pokemon.name.includes(query))
   }, [pokemons, pokemonSearch])
+  const selectedPokemonIds = new Set(selectedPokemons.map((pokemon) => pokemon.id))
 
   const handleAddTeam = (e) => {
     e.preventDefault()
@@ -68,7 +72,7 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
     setNewTeamName('')
     setSelectedPokemons([])
     setPokemonSearch('')
-    setVisiblePokemonCount(18)
+    setVisiblePokemonCount(POKEMON_BATCH_SIZE)
     setError('')
   }
 
@@ -77,13 +81,15 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
       if (selected.some((item) => item.id === pokemon.id)) {
         return selected.filter((item) => item.id !== pokemon.id)
       }
-      if (selected.length >= 6) return selected
+      if (selected.length >= MAX_TEAM_SIZE) return selected
       return [...selected, pokemon]
     })
   }
 
   if (teamId) {
     const team = teams.find((item) => String(item.id) === teamId)
+    const teamPokemonIds = new Set(team?.pokemons.map((pokemon) => pokemon.id) ?? [])
+    const teamIsFull = (team?.pokemons.length ?? 0) >= MAX_TEAM_SIZE
 
     if (!team) {
       return (
@@ -106,7 +112,7 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
             <p className="text-light opacity-75 mb-0">Beheer de Pokémon in dit team.</p>
           </div>
           <span className="badge bg-primary fs-6 px-3 py-2 rounded-pill">
-            {team.pokemons.length} / 6 Pokémon
+            {team.pokemons.length} / {MAX_TEAM_SIZE} Pokémon
           </span>
         </header>
 
@@ -158,11 +164,11 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
               value={pokemonSearch}
               onChange={(event) => {
                 setPokemonSearch(event.target.value)
-                setVisiblePokemonCount(18)
+                setVisiblePokemonCount(POKEMON_BATCH_SIZE)
               }}
             />
           </div>
-          {team.pokemons.length >= 6 && (
+          {teamIsFull && (
             <p className="text-muted">Dit team is vol. Verwijder eerst een Pokémon om er een toe te voegen.</p>
           )}
           {loadingPokemons && <p role="status">Pokémon ophalen uit de PokéAPI...</p>}
@@ -188,8 +194,7 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
               </p>
               <div className="row g-3">
                 {filteredPokemons.slice(0, visiblePokemonCount).map((pokemon) => {
-                  const alreadyInTeam = team.pokemons.some((member) => member.id === pokemon.id)
-                  const teamIsFull = team.pokemons.length >= 6
+                  const alreadyInTeam = teamPokemonIds.has(pokemon.id)
                   return (
                     <div className="col-12 col-sm-6 col-lg-4" key={pokemon.id}>
                       <div className="card p-2 h-100 d-flex flex-row align-items-center gap-3">
@@ -219,7 +224,7 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
                 <button
                   type="button"
                   className="btn btn-outline-primary mt-3"
-                  onClick={() => setVisiblePokemonCount((count) => count + 18)}
+                  onClick={() => setVisiblePokemonCount((count) => count + POKEMON_BATCH_SIZE)}
                 >
                   Toon meer Pokémon
                 </button>
@@ -253,7 +258,7 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
         </div>
         <div className="mb-3">
           <label className="form-label fw-semibold" htmlFor="new-team-pokemon-search">
-            Kies Pokémon ({selectedPokemons.length} / 6)
+            Kies Pokémon ({selectedPokemons.length} / {MAX_TEAM_SIZE})
           </label>
           <input
             id="new-team-pokemon-search"
@@ -263,7 +268,7 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
             value={pokemonSearch}
             onChange={(event) => {
               setPokemonSearch(event.target.value)
-              setVisiblePokemonCount(18)
+              setVisiblePokemonCount(POKEMON_BATCH_SIZE)
             }}
           />
         </div>
@@ -305,12 +310,12 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
         {!loadingPokemons && !pokemonError && filteredPokemons.length > 0 && (
           <>
             <p className="text-muted">
-              Kies Pokémon door op een afbeelding te klikken. {selectedPokemons.length} van 6 gekozen.
+              Kies Pokémon door op een afbeelding te klikken. {selectedPokemons.length} van {MAX_TEAM_SIZE} gekozen.
             </p>
             <div className="row g-3 mb-4">
               {filteredPokemons.slice(0, visiblePokemonCount).map((pokemon) => {
-                const isSelected = selectedPokemons.some((item) => item.id === pokemon.id)
-                const selectionIsFull = selectedPokemons.length >= 6
+                const isSelected = selectedPokemonIds.has(pokemon.id)
+                const selectionIsFull = selectedPokemons.length >= MAX_TEAM_SIZE
                 return (
                   <div className="col-6 col-sm-4 col-md-3 col-lg-2" key={pokemon.id}>
                     <button
@@ -335,7 +340,7 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
               <button
                 type="button"
                 className="btn btn-outline-primary mb-4"
-                onClick={() => setVisiblePokemonCount((count) => count + 18)}
+                onClick={() => setVisiblePokemonCount((count) => count + POKEMON_BATCH_SIZE)}
               >
                 Toon meer Pokémon
               </button>
@@ -358,7 +363,9 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
                 <div className="d-flex justify-content-between align-items-start gap-2">
                   <div>
                     <h2 className="h5 fw-bold mb-1">{team.name}</h2>
-                    <span className="badge bg-secondary">{team.pokemons.length} / 6 Pokémon</span>
+                    <span className="badge bg-secondary">
+                      {team.pokemons.length} / {MAX_TEAM_SIZE} Pokémon
+                    </span>
                   </div>
                   <button
                     type="button"
@@ -370,7 +377,7 @@ function Teams({ teams, onAddTeam, onDeleteTeam, onAddPokemon, onRemoveFromTeam 
                   </button>
                 </div>
                 <div className="team-roster my-3" aria-label="Pokémon in dit team">
-                  {Array.from({ length: 6 }, (_, index) => {
+                  {Array.from({ length: MAX_TEAM_SIZE }, (_, index) => {
                     const pokemon = team.pokemons[index]
                     return pokemon ? (
                       <div className="team-roster-slot" key={pokemon.id}>
